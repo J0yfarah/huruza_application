@@ -24,7 +24,7 @@ export default function FertilizerRecommendScreen() {
     };
     console.log('Data to send:', dataToSend); 
     try {
-      const response = await fetch('http://192.168.227.7:5002/predict', {
+      const response = await fetch('http://ip:5002/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

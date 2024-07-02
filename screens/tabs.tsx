@@ -5,7 +5,7 @@ import MarketplaceScreen from '../screens/MarketplaceScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import CustomTabBar from './CustomTabBar';
-
+//
 const Tab = createBottomTabNavigator();
 
 function Tabs() {

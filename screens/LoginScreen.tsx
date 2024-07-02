@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { loginUser } from './api';
 
 const { height } = Dimensions.get('window');
-
+//test
 export default function LoginScreen({ visible, onClose }) {
   const [farmer_id, setFarmerId] = useState('');
   const [farmer_password, setFarmerPassword] = useState('');

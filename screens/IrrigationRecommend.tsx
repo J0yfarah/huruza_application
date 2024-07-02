@@ -19,7 +19,7 @@ export default function IrrigationRecommendScreen() {
   const handlePredictIrrigation = async () => {
     console.log('Making prediction request...');
     try {
-      const response = await fetch('http://192.168.227.7:5001/predict', {
+      const response = await fetch('http://ip:5001/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

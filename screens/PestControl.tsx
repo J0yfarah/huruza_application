@@ -12,7 +12,7 @@ export default function PestControlScreen() {
   const [cameraType, setCameraType] = useState(CameraType.back);
   const [showPredictButton, setShowPredictButton] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
+//
   useEffect(() => {
     (async () => {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',  // semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',  
   },
   modalView: {
     backgroundColor: 'white',

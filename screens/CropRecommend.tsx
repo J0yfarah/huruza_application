@@ -26,7 +26,7 @@ export default function CropRecommendScreen() {
   const handlePredictCrop = async () => {
     console.log('Making prediction request...');
     try {
-      const response = await fetch('http://192.168.227.7:5000/predict', {
+      const response = await fetch('http://ip:5000/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

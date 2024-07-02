@@ -20,7 +20,7 @@ export default function ChartScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://192.168.227.7/backend_hurudza/get_crop.php')
+    fetch('http://ip/backend_hurudza/get_crop.php')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -53,7 +53,7 @@ export default function ChartScreen() {
     );
   }
 
- 
+ //test
   const timestamps = data.map(row => new Date(row.Time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const nValues = data.map(row => parseFloat(row.n));
   const pValues = data.map(row => parseFloat(row.p));
