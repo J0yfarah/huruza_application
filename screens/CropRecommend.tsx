@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -15,10 +15,18 @@ export default function CropRecommendScreen() {
   const [predictedCrop, setPredictedCrop] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
+  const n = useRef(null);
+  const p = useRef(null);
+  const k = useRef(null);
+  const temp = useRef(null);
+  const hum = useRef(null);
+  const ph = useRef(null);
+  const rain = useRef(null);
+
   const handlePredictCrop = async () => {
     console.log('Making prediction request...');
     try {
-      const response = await fetch('http://10.42.0.34:5000/predict', {
+      const response = await fetch('http://192.168.227.7:5000/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -59,6 +67,9 @@ export default function CropRecommendScreen() {
               value={parameters.N}
               onChangeText={text => setParameters(prev => ({ ...prev, N: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={n}
+              onSubmitEditing={() => p.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -68,6 +79,9 @@ export default function CropRecommendScreen() {
               value={parameters.P}
               onChangeText={text => setParameters(prev => ({ ...prev, P: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={p}
+              onSubmitEditing={() => k.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -77,6 +91,9 @@ export default function CropRecommendScreen() {
               value={parameters.K}
               onChangeText={text => setParameters(prev => ({ ...prev, K: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={k}
+              onSubmitEditing={() => temp.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -86,6 +103,9 @@ export default function CropRecommendScreen() {
               value={parameters.temperature}
               onChangeText={text => setParameters(prev => ({ ...prev, temperature: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={temp}
+              onSubmitEditing={() => hum.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -95,6 +115,9 @@ export default function CropRecommendScreen() {
               value={parameters.humidity}
               onChangeText={text => setParameters(prev => ({ ...prev, humidity: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={hum}
+              onSubmitEditing={() => ph.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -104,6 +127,9 @@ export default function CropRecommendScreen() {
               value={parameters.ph}
               onChangeText={text => setParameters(prev => ({ ...prev, ph: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={ph}
+              onSubmitEditing={() => rain.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -113,6 +139,9 @@ export default function CropRecommendScreen() {
               value={parameters.rainfall}
               onChangeText={text => setParameters(prev => ({ ...prev, rainfall: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={rain}
+             
             />
           </View>
         </View>

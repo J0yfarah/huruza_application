@@ -1,42 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 export default function FertilizerRecommendScreen() {
   const [parameters, setParameters] = useState({
-    Temperature: '',
-    Humidity: '',
-    Moisture: '',
     Nitrogen: '',
     Potassium: '',
-    Phosphorous: ''
+    Phosphorous: '',
   });
   const [predictedFertilizer, setPredictedFertilizer] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
+  const n = useRef(null);
+  const p = useRef(null);
+  const k = useRef(null);
+
   const handlePredictFertilizer = async () => {
     console.log('Making prediction request..');
+    const dataToSend = {
+      Nitrogen: parseFloat(parameters.Nitrogen),
+      Potassium: parseFloat(parameters.Potassium),
+      Phosphorous: parseFloat(parameters.Phosphorous),
+    };
+    console.log('Data to send:', dataToSend); 
     try {
-      const response = await fetch('http://10.42.0.34:5002/predict', {
+      const response = await fetch('http://192.168.227.7:5002/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(parameters),
+        body: JSON.stringify(dataToSend),
       });
 
       console.log('Prediction request completed');
-
+      console.log('Response status:', response.status);
       const responseData = await response.json();
-      console.log(responseData);
-      setPredictedFertilizer(responseData.prediction);
-      setModalVisible(true);  // Show the modal when prediction is received
+      console.log('Response data:', responseData);
+
+      if (response.status === 200) {
+        setPredictedFertilizer(responseData.prediction);
+        setModalVisible(true);  
+      } else {
+        console.error('Error response from server:', responseData);
+        Alert.alert('Error', 'An error occurred while fetching data');
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       Alert.alert('Error', 'An error occurred while fetching data');
     }
   };
-
 
   return (
     <View style={styles.container}>
@@ -50,7 +62,7 @@ export default function FertilizerRecommendScreen() {
         </TouchableOpacity>
       </View>
       <ScrollView>
-        <Text style={styles.textt3}>Optimizing water usage with smart irrigation strategies based on real-time data and environmental factors. </Text>
+        <Text style={styles.textt3}>Enhancing agricultural sustainability through precision irrigation techniques informed by real-time data and environmental factors. </Text>
         <View style={styles.card}>
           <View style={styles.parameterRow}>
             <Text style={styles.parameterLabel}>Nitrogen:</Text>
@@ -59,6 +71,9 @@ export default function FertilizerRecommendScreen() {
               value={parameters.Nitrogen}
               onChangeText={(text) => setParameters((prev) => ({ ...prev, Nitrogen: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={n}
+              onSubmitEditing={() => p.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -68,6 +83,9 @@ export default function FertilizerRecommendScreen() {
               value={parameters.Phosphorous}
               onChangeText={(text) => setParameters((prev) => ({ ...prev, Phosphorous: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={p}
+              onSubmitEditing={() => k.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -77,33 +95,8 @@ export default function FertilizerRecommendScreen() {
               value={parameters.Potassium}
               onChangeText={(text) => setParameters((prev) => ({ ...prev, Potassium: text }))}
               keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.parameterRow}>
-            <Text style={styles.parameterLabel}>Temperature:</Text>
-            <TextInput
-              style={styles.input}
-              value={parameters.Temperature}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, Temperature: text }))}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.parameterRow}>
-            <Text style={styles.parameterLabel}>Humidity:</Text>
-            <TextInput
-              style={styles.input}
-              value={parameters.Humidity}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, Humidity: text }))}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.parameterRow}>
-            <Text style={styles.parameterLabel}>Moisture:</Text>
-            <TextInput
-              style={styles.input}
-              value={parameters.Moisture}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, Moisture: text }))}
-              keyboardType="numeric"
+              returnKeyType="next"
+              ref={k}
             />
           </View>
         </View>
@@ -112,7 +105,7 @@ export default function FertilizerRecommendScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal for displaying the prediction */}
+     
       <Modal
         animationType="slide"
         transparent={true}
@@ -222,7 +215,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',  // semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',  
   },
   modalView: {
     backgroundColor: 'white',

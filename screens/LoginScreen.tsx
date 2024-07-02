@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, Modal, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { loginUser } from './api';
@@ -9,7 +9,9 @@ export default function LoginScreen({ visible, onClose }) {
   const [farmer_id, setFarmerId] = useState('');
   const [farmer_password, setFarmerPassword] = useState('');
   const navigation = useNavigation();
-
+  const id = useRef(null);
+  const pass = useRef(null);
+ 
   const handleLogin = async () => {
     try {
       const response = await loginUser(farmer_id, farmer_password);
@@ -44,6 +46,11 @@ export default function LoginScreen({ visible, onClose }) {
             placeholder="Enter your ID"
             value={farmer_id}
             onChangeText={setFarmerId}
+            returnKeyType="next"
+            ref={id}
+            onSubmitEditing={() => pass.current.focus()}
+
+
           />
           <Text style={styles.label}>Password</Text>
           <TextInput
@@ -52,6 +59,9 @@ export default function LoginScreen({ visible, onClose }) {
             secureTextEntry={true}
             value={farmer_password}
             onChangeText={setFarmerPassword}
+            returnKeyType="next"
+            ref={pass}
+
           />
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Login</Text>
@@ -77,12 +87,14 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    height: '50%',
+    height: '55%',
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 24,
+    paddingTop: 50,
+    paddingHorizontal: 24,
     alignItems: 'center',
+    
   },
   label: {
     alignSelf: 'flex-start',
@@ -95,11 +107,21 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
     marginBottom: 20,
-    paddingHorizontal: 10,
     backgroundColor: '#fff',
+    borderColor: '#f2f2f2',
+    borderRadius: 25,
+    marginLeft: 10,
+    paddingHorizontal: 20,
+  },
+  input2: {
+    flex: 1,
+    height: 40,
+    borderColor: '#f2f2f2',
+    borderRadius: 25,
+    borderWidth: 1,
+    marginLeft: 10,
+    paddingHorizontal: 20,
   },
   button: {
     width: '100%',

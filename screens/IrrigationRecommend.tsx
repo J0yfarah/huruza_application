@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef }  from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput, Modal } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -8,14 +8,18 @@ export default function IrrigationRecommendScreen() {
     temperature: '',
     humidity: '',
     moisture: '',
+    time: '',
   });
   const [predictedIrrigation, setPredictedIrrigation] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-
+  const temp = useRef(null);
+  const hum = useRef(null);
+  const moist = useRef(null);
+  const time = useRef(null);
   const handlePredictIrrigation = async () => {
     console.log('Making prediction request...');
     try {
-      const response = await fetch('http://10.42.0.34:5001/predict', {
+      const response = await fetch('http://192.168.227.7:5001/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,6 +60,9 @@ export default function IrrigationRecommendScreen() {
               value={parameters.temperature}
               onChangeText={(text) => setParameters((prev) => ({ ...prev, temperature: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={temp}
+              onSubmitEditing={() => hum.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -65,6 +72,9 @@ export default function IrrigationRecommendScreen() {
               value={parameters.humidity}
               onChangeText={(text) => setParameters((prev) => ({ ...prev, humidity: text }))}
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={hum}
+              onSubmitEditing={() => moist.current.focus()}
             />
           </View>
           <View style={styles.parameterRow}>
@@ -72,10 +82,25 @@ export default function IrrigationRecommendScreen() {
             <TextInput
               style={styles.input}
               value={parameters.moisture}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, moisture: text }))}
+              onChangeText={(text) => setParameters((prev) => ({ ...prev, moisture: text })) }
               keyboardType="numeric"
+              returnKeyType="next"
+              ref={moist}
+              onSubmitEditing={() => time.current.focus()}
             />
           </View>
+          <View style={styles.parameterRow}>
+            <Text style={styles.parameterLabel}>Time:</Text>
+            <TextInput
+              style={styles.input}
+              value={parameters.time}
+              onChangeText={(text) => setParameters((prev) => ({ ...prev, time: text })) }
+              keyboardType="numeric"
+              returnKeyType="next"
+              ref={time}
+            />
+          </View>
+
         </View>
         <TouchableOpacity style={styles.touchableOpacity} onPress={handlePredictIrrigation}>
           <Text style={styles.button}>Check Irrigation</Text>

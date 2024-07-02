@@ -17,7 +17,9 @@ import PestControlScreen from '../screens/PestControl';
 import FertilizerRecommendScreen from '../screens/FertilizerRecommend';
 import { Feather } from '@expo/vector-icons';
 import 'react-native-gesture-handler';
+import ChartScreen from '../screens/ChartScreen';
 import { AlignCenter } from 'react-native-feather';
+import Grafana from '../screens/graphana';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -59,7 +61,7 @@ function Tabs() {
                         </View>
                     )
                 }} />
-        <Tab.Screen name="Notifications" component={NotificationsScreen}  options={{
+        <Tab.Screen name="Notifications" component={ChartScreen}  options={{
                     headerShown: false,
                     tabBarIcon: ({ focused }) => (
                         <View style={[
@@ -96,6 +98,7 @@ function Tabs() {
         <Stack.Screen name="Recommend" component={CropRecommendScreen}  options={{ headerShown: false }} />
         <Stack.Screen name="Irrigation" component={IrrigationRecommendScreen}  options={{ headerShown: false }} />
         <Stack.Screen name="Pest" component={PestControlScreen}  options={{ headerShown: false }} />
+        <Stack.Screen name="grafana" component={Grafana}  options={{ headerShown: false }} />
 
         <Stack.Screen name="Fertilizer" component={FertilizerRecommendScreen}  options={{ headerShown: false }} />
 

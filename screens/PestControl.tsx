@@ -1,90 +1,153 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { Camera, CameraType } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function PestControlScreen() {
-  const [parameters, setParameters] = useState({
-    temperature: '',
-    humidity: '',
-    moisture: '',
-  });
-  const [predictedCrop, setPredictedCrop] = useState('');
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [cameraRef, setCameraRef] = useState<Camera | null>(null);
+  const [image, setImage] = useState<string | null>(null);
+  const [predictedResult, setPredictedResult] = useState<string>('');
+  const [cameraType, setCameraType] = useState(CameraType.back);
+  const [showPredictButton, setShowPredictButton] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const handlePredictIrrigation = async () => {
+  useEffect(() => {
+    (async () => {
+      const cameraStatus = await Camera.requestCameraPermissionsAsync();
+      const imagePickerStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setHasPermission(cameraStatus.status === 'granted' && imagePickerStatus.status === 'granted');
+    })();
+  }, []);
+
+  const handlePredict = async (imageUri: string) => {
     console.log('Making prediction request...');
+    const formData = new FormData();
+    formData.append('file', {
+      uri: imageUri,
+      name: 'photo.jpg',
+      type: 'image/jpeg',
+    } as any);
+
     try {
-      const response = await fetch('http://10.42.0.34:5001/predict', {
+      const response = await fetch('http://192.168.227.7:5003/predict', {
+        
         method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
-        body: JSON.stringify(parameters),
       });
-
       console.log('Prediction request completed');
-
       const responseData = await response.json();
       console.log(responseData);
-      setPredictedCrop(responseData.prediction);
+      setPredictedResult(responseData.predicted_class_name);
+      setModalVisible(true);
     } catch (error) {
-      console.error('Error fetching data:', error);
       Alert.alert('Error', 'An error occurred while fetching data');
     }
   };
 
+  const handleTakePicture = async () => {
+    if (cameraRef) {
+      const photo = await cameraRef.takePictureAsync();
+      setImage(photo.uri);
+      setShowPredictButton(true);
+    }
+  };
+
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      //aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const selectedImage = result.assets[0].uri;
+      setImage(selectedImage);
+      setShowPredictButton(true);
+    }
+  };
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera or gallery</Text>;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.topSection}>
-     <View style={styles.textContainer}>
-       <Text style={styles.textt1}>Welcome to </Text>
-       <Text style={styles.textt2}>Hurudza! </Text>
-     </View>
-     <TouchableOpacity onPress={() => console.log('Setting icon clicked')} style={styles.settingsButton}>
-       <Feather name="settings" size={30} color="#000" />
-     </TouchableOpacity>
-   </View>
-      <ScrollView>
-      <Text style={styles.textt3}>Optimizing water usage with smart irrigation strategies based on real-time data and environmental factors. </Text>
-        <View style={styles.card}>
-          
-          <View style={styles.parameterRow}>
-            <Text style={styles.parameterLabel}>Temperature:</Text>
-            <TextInput
-              style={styles.input}
-              value={parameters.temperature}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, temperature: text }))}
-              keyboardType="numeric"
-            />
+        <View style={styles.textContainer}>
+          <Text style={styles.textt1}>Welcome to</Text>
+          <Text style={styles.textt2}>Hurudza!</Text>
+        </View>
+        <TouchableOpacity onPress={() => console.log('Setting icon clicked')} style={styles.settingsButton}>
+          <Feather name="settings" size={30} color="#000" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.cameraContainer}>
+        <Camera
+          style={styles.camera}
+          type={cameraType}
+          ref={(ref) => setCameraRef(ref)}
+        >
+          <View style={styles.cameraButtons}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => {
+                setCameraType(
+                  cameraType === CameraType.back ? CameraType.front : CameraType.back
+                );
+              }}
+            >
+              <Feather name="repeat" size={30} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} onPress={handleTakePicture}>
+              <Feather name="camera" size={30} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} onPress={handlePickImage}>
+              <Feather name="image" size={30} color="#fff" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.parameterRow}>
-            <Text style={styles.parameterLabel}>Humidity:</Text>
-            <TextInput
-              style={styles.input}
-              value={parameters.humidity}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, humidity: text }))}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.parameterRow}>
-            <Text style={styles.parameterLabel}>Moisture:</Text>
-            <TextInput
-              style={styles.input}
-              value={parameters.moisture}
-              onChangeText={(text) => setParameters((prev) => ({ ...prev, moisture: text }))}
-              keyboardType="numeric"
-            />
+        </Camera>
+      </View>
+      {image && (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: image }} style={styles.image} />
+        </View>
+      )}
+      {showPredictButton && (
+        <TouchableOpacity style={styles.predictButton} onPress={() => handlePredict(image as string)}>
+          <Text style={styles.predictButtonText}>Predict Disease</Text>
+        </TouchableOpacity>
+      )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Predicted Disease or Pest:</Text>
+            <Text style={styles.modalText}>{predictedResult}</Text>
+            <TouchableOpacity
+              style={[styles.touchableOpacity, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.textStyle}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity style={styles.touchableOpacity} onPress={handlePredictIrrigation}>
-          <Text style={styles.button}>Predict Irrigation</Text>
-        </TouchableOpacity>
-        {predictedCrop ? (
-          <View style={styles.predictedCropContainer}>
-            <Text style={styles.predictedCropLabel}>Your irrigration system should be:</Text>
-            <Text style={styles.predictedCrop}>{predictedCrop}</Text>
-          </View>
-        ) : null}
-      </ScrollView>
+      </Modal>
     </View>
   );
 }
@@ -102,11 +165,9 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     paddingVertical: 15,
     backgroundColor: '#fff',
-    
   },
   textContainer: {
     flexDirection: 'column',
-    // Add additional styling if needed
   },
   textt1: {
     fontFamily: 'Poppins-SemiBold',
@@ -116,50 +177,48 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: 36,
   },
-  textt3: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    marginLeft: 30,
-  },
   settingsButton: {
     marginBottom: 64,
-    // Adjust styles as needed
   },
-  card: {
-    marginTop:30,
-    marginHorizontal: 24,
-    backgroundColor: '#fff',
-    borderRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  cameraContainer: {
+    flex: 1,
   },
-  parameterRow: {
+  camera: {
+    flex: 1,
+  },
+  cameraButtons: {
+    flex: 1,
+    backgroundColor: 'transparent',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
+    margin: 20,
+    alignItems: 'flex-end',
   },
-  parameterLabel: {
-    fontSize: 14,
-    color: '#333',
-    fontFamily: 'Poppins-SemiBold',
-    alignSelf: 'center',
-
+  iconButton: {
+    alignItems: 'center',
+    padding: 10,
   },
-  input: {
+  imageContainer: {
     flex: 1,
-    height: 40,
-    borderColor: '#f2f2f2',
-    borderRadius: 25,
-    borderWidth: 1,
-    marginLeft: 10,
-    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 30,
   },
   touchableOpacity: {
+    margin: 20,
+    backgroundColor: '#dcefdd',
+    width: 370,
+    borderRadius: 25,
+  
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  image: {
+   
+    height: 250,
+    width: 250,
+    borderRadius: 10,
+  },
+  predictButton: {
     margin: 20,
     backgroundColor: '#dcefdd',
     width: 370,
@@ -168,30 +227,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
   },
-  button: {
-    fontSize: 14,
-    fontFamily: 'Poppins-SemiBold',
-    color: '#333',
+  predictButtonText: {
+   
+      fontSize: 14,
+      fontFamily: 'Poppins-SemiBold',
+      color: '#333',
+
   },
-  predictedCropContainer: {
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',  // semi-transparent background
   },
-  predictedCropLabel: {
-    fontSize: 16,
-    color: '#333',
-    fontFamily: 'Poppins-Bold',
+  modalView: {
+    backgroundColor: 'white',
+    width: '80%',
+    borderRadius: 25,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  predictedCrop: {
-    fontSize: 14,
-    color: '#333',
-    fontFamily: 'Poppins-SemiBold',
+  buttonClose: {
+    backgroundColor: '#dcefdd',
+    marginTop: 15,
+    width: 100,
   },
-  cardTitle: {
-    fontSize: 24,
-    color: '#333',
-    fontFamily: 'Poppins-Bold',
+  textStyle: {
+    color: 'black',
+    fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
+    paddingHorizontal: 20,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 18,
   },
 });

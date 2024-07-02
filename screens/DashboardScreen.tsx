@@ -87,7 +87,7 @@ export default function DashboardScreen() {
             units: 'metric'
           }
         });
-        setWeatherData(response.data); // Set weather data in state
+        setWeatherData(response.data); 
       } catch (error) {
         console.error('Error fetching weather data:', error);
       }
@@ -109,14 +109,14 @@ export default function DashboardScreen() {
         setFontsLoaded(true);
       } catch (error) {
         console.error('Error loading fonts:', error);
-        // Handle font loading error
+       
       }
     }
     loadFonts();
   }, []);
 
   if (!fontsLoaded || !weatherData) {
-    // Return a loading indicator or null until fonts are loaded
+   
     return null;
   }
 
@@ -134,26 +134,24 @@ export default function DashboardScreen() {
 
        
 
-        {/* Section 3: Weather Forecast */}
    
 
-   {/* Section 3: Weather Forecast */}
+   
    <View style={styles.weatherForecast}>
-         {/* <Text style={styles.weatherTitle}>Weather Forecast</Text> */}
-        
+       
 
-          {/* Weather Widget */}
+        
           <WebView
   style={styles.webView}
   originWhitelist={['*']}
   source={require('../assets/weather2.html')}
-  scalesPageToFit={true} // Enable this to allow the page to be scaled to fit the WebView
+  scalesPageToFit={true} 
 />
 
 
         </View>
 
-        {/* Section 4: Grid of 2x2 sections */}
+       
         <View style={styles.gridContainer}>
           {/* Top Left */}
           <TouchableOpacity style={styles.gridItem} onPress={() => navigateToRecommendScreen()}>
@@ -166,7 +164,7 @@ export default function DashboardScreen() {
           {/* Top Right */}
           <TouchableOpacity style={styles.gridItem}  onPress={() => navigateToPest()} >
             <Feather name="activity" size={24} color="#000" style={styles.gridIcon} />
-            <Text style={styles.gridTitle}>Pest & Diseases Control</Text>
+            <Text style={styles.gridTitle}>Plant Diseases Detection</Text>
             <TouchableOpacity style={styles.arrowButton}>
               <Feather name="chevron-right" size={24} color="#000" />
             </TouchableOpacity>
@@ -219,7 +217,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flexDirection: 'column',
-    // Add additional styling if needed
+   
   },
   textt1: {
     fontFamily: 'Poppins-SemiBold',
@@ -231,7 +229,7 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     marginBottom: 64,
-    // Adjust styles as needed
+   
   },
   fieldsSlider: {
    
